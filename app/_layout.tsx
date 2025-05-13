@@ -8,9 +8,10 @@ import {
   Modal,
   FlatList,
   Pressable,
-  Image
+  Image,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context"; // 👈 à installer si ce n'est pas fait
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function Layout() {
   const [menuVisible, setMenuVisible] = useState(false);
@@ -22,27 +23,37 @@ export default function Layout() {
     { id: "3", title: "Formateurs", route: "/formateurs" },
     { id: "4", title: "Calendrier", route: "/calendrier" },
     { id: "5", title: "À propos", route: "/apropos" },
-    { id: "6", title: "Connexion", route: "/login" },
-    { id: "7", title: "Inscription", route: "/register" },
   ];
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       {/* NAVBAR EN HAUT */}
       <View style={styles.navbar}>
-        <Image
-          source={require("../assets/images/logo.png")}
-          style={styles.logo}
-        />
+        {/* ☰ MENU GAUCHE */}
         <TouchableOpacity onPress={() => setMenuVisible(true)} style={styles.menuButton}>
-          <Text style={styles.menuIcon}>☰</Text>
+          <Ionicons name="menu" size={24} color="#fff" />
         </TouchableOpacity>
+
+        {/* LOGO CENTRÉ */}
+        <Image source={require("../assets/images/logo.png")} style={styles.logo} />
+
+        {/* ICONES À DROITE */}
+        <View style={styles.rightIcons}>
+          <TouchableOpacity style={styles.iconWrapper} onPress={() => router.push("/login")}>
+            <Ionicons name="log-in-outline" size={20} color="#fff" />
+            <Text style={styles.iconText}>Connexion</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconWrapper} onPress={() => router.push("/register")}>
+            <Ionicons name="person-add-outline" size={20} color="#fff" />
+            <Text style={styles.iconText}>Inscription</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* ROUTEUR STACK */}
       <Stack screenOptions={{ headerShown: false }} />
 
-      {/* MODAL MENU */}
+      {/* MENU LATÉRAL MODAL */}
       <Modal visible={menuVisible} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -78,7 +89,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 15,
+    paddingHorizontal: 10,
   },
   logo: {
     width: 40,
@@ -86,11 +97,22 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
   },
   menuButton: {
-    padding: 10,
+    padding: 8,
   },
-  menuIcon: {
-    fontSize: 24,
+  rightIcons: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  iconWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 5,
+  },
+  iconText: {
     color: "#fff",
+    fontSize: 14,
   },
   modalOverlay: {
     flex: 1,
@@ -125,6 +147,6 @@ const styles = StyleSheet.create({
   closeButtonText: {
     color: "#fff",
     fontSize: 16,
-    fontWeight: "bold"
-  }
+    fontWeight: "bold",
+  },
 });

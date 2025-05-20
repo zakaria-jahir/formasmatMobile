@@ -21,22 +21,44 @@ export default function Register() {
         setForm({ ...form, [field]: value });
       };
     
-      const handleRegister = () => {
-        const { username, firstName, lastName, email, phone, city, postalCode, address, password1, password2 } = form;
-    
-        if (!username || !firstName || !lastName || !email || !phone || !city || !postalCode || !address || !password1 || !password2) {
-          Alert.alert("Erreur", "Veuillez remplir tous les champs.");
-          return;
-        }
-    
-        if (password1 !== password2) {
-          Alert.alert("Erreur", "Les mots de passe ne correspondent pas.");
-          return;
-        }
-    
-        // Add API call for registration here
-        Alert.alert("Inscription réussie", `Bienvenue, ${username}!`);
-      };
+const handleRegister = async () => {
+  const {
+    username, firstName, lastName, email,
+    phone, city, postalCode, address,
+    password1, password2
+  } = form;
+
+  if (!username || !firstName || !lastName || !email || !phone || !city || !postalCode || !address || !password1 || !password2) {
+    Alert.alert("Erreur", "Veuillez remplir tous les champs.");
+    return;
+  }
+
+  if (password1 !== password2) {
+    Alert.alert("Erreur", "Les mots de passe ne correspondent pas.");
+    return;
+  }
+
+  try {
+    const response = await fetch("http://192.168.0.75:8000/api/register/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.success) {
+      Alert.alert("Inscription réussie", data.message);
+      router.push("/login"); // redirection vers login
+    } else {
+      Alert.alert("Erreur", data.message || "Échec de l’inscription.");
+    }
+  } catch (error) {
+    console.error("Erreur:", error);
+    Alert.alert("Erreur", "Impossible de se connecter au serveur.");
+  }
+};
+
     
       return (
         <ScrollView contentContainerStyle={styles.container}>

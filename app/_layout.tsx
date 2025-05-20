@@ -12,10 +12,12 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { useUser, UserProvider } from "../contexts/UserContext"; // Assurez-vous que ce chemin est correct
 
-export default function Layout() {
+function InnerLayout() {
   const [menuVisible, setMenuVisible] = useState(false);
   const router = useRouter();
+  const { user, logout } = useUser();
 
   const menuItems = [
     { id: "1", title: "Accueil", route: "/" },
@@ -24,38 +26,48 @@ export default function Layout() {
     { id: "4", title: "Calendrier", route: "/calendrier" },
     { id: "5", title: "À propos", route: "/apropos" },
     { id: "6", title: "Sessions", route: "/sessions" },
-
   ];
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       {/* NAVBAR EN HAUT */}
       <View style={styles.navbar}>
-        {/* ☰ MENU GAUCHE */}
         <TouchableOpacity onPress={() => setMenuVisible(true)} style={styles.menuButton}>
           <Ionicons name="menu" size={24} color="#fff" />
         </TouchableOpacity>
 
-        {/* LOGO CENTRÉ */}
         <Image source={require("../assets/images/logo.png")} style={styles.logo} />
 
-        {/* ICONES À DROITE */}
         <View style={styles.rightIcons}>
-          <TouchableOpacity style={styles.iconWrapper} onPress={() => router.push("/login")}>
-            <Ionicons name="log-in-outline" size={20} color="#fff" />
-            <Text style={styles.iconText}>Connexion</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconWrapper} onPress={() => router.push("/register")}>
-            <Ionicons name="person-add-outline" size={20} color="#fff" />
-            <Text style={styles.iconText}>Inscription</Text>
-          </TouchableOpacity>
+          {user ? (
+            <>
+              <View style={styles.iconWrapper}>
+                <Ionicons name="person-circle-outline" size={20} color="#fff" />
+                <Text style={styles.iconText}>
+                  {user.first_name || user.email || "Utilisateur"}
+                </Text>
+              </View>
+              <TouchableOpacity onPress={logout}>
+                <Ionicons name="log-out-outline" size={24} color="#fff" />
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              <TouchableOpacity style={styles.iconWrapper} onPress={() => router.push("/login")}> 
+                <Ionicons name="log-in-outline" size={20} color="#fff" />
+                <Text style={styles.iconText}>Connexion</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.iconWrapper} onPress={() => router.push("/register")}> 
+                <Ionicons name="person-add-outline" size={20} color="#fff" />
+                <Text style={styles.iconText}>Inscription</Text>
+              </TouchableOpacity>
+            </>
+          )}
         </View>
       </View>
 
-      {/* ROUTEUR STACK */}
       <Stack screenOptions={{ headerShown: false }} />
 
-      {/* MENU LATÉRAL MODAL */}
       <Modal visible={menuVisible} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -81,6 +93,14 @@ export default function Layout() {
         </View>
       </Modal>
     </SafeAreaView>
+  );
+}
+
+export default function Layout() {
+  return (
+    <UserProvider>
+      <InnerLayout />
+    </UserProvider>
   );
 }
 

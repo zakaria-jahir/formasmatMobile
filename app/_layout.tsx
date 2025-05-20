@@ -23,6 +23,8 @@ export default function Layout() {
     { id: "3", title: "Formateurs", route: "/formateurs" },
     { id: "4", title: "Calendrier", route: "/calendrier" },
     { id: "5", title: "À propos", route: "/apropos" },
+    { id: "6", title: "Sessions", route: "/sessions" },
+
   ];
 
   return (

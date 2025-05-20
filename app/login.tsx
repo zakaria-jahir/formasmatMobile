@@ -8,12 +8,34 @@ export default function Login() {
     const router = useRouter();
 
   
-    const handleLogin = async () => {
-      if (!email || !password) {
-          Alert.alert("Erreur", "Veuillez remplir tous les champs.");
-          return;
-      }
-  
+const handleLogin = async () => {
+  if (!email || !password) {
+    Alert.alert("Erreur", "Veuillez remplir tous les champs.");
+    return;
+  }
+
+  try {
+    const response = await fetch("http://192.168.0.75:8000/api/login/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.success) {
+      Alert.alert("Connexion réussie", `Bienvenue !`);
+      router.push("/"); // redirection si succès
+    } else {
+      Alert.alert("Erreur", data.message || "Identifiants incorrects");
+    }
+  } catch (error) {
+    console.error(error);
+    Alert.alert("Erreur", "Connexion impossible.");
+  }
+};
+
+
       try {
           const response = await fetch("http://192.168.0.76:5000/api/auth/", {
               method: "POST",

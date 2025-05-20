@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,9 +6,9 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
-import { formations as allFormations } from "./formations.data";
-
+import axios from "axios";
 
 export default function FormationsScreen() {
   const [search, setSearch] = useState("");
@@ -16,6 +16,22 @@ export default function FormationsScreen() {
   const [selectedModes, setSelectedModes] = useState<string[]>([]);
   const [minDuration, setMinDuration] = useState("");
   const [maxDuration, setMaxDuration] = useState("");
+
+  const [allFormations, setAllFormations] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Chargement des données depuis l'API
+  useEffect(() => {
+    axios.get("http://192.168.0.75:8000/api/formations/")
+      .then((response) => {
+        setAllFormations(response.data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Erreur lors du chargement des formations :", error);
+        setLoading(false);
+      });
+  }, []);
 
   // ➕ Sélectionner ou désélectionner un mode
   const toggleMode = (mode: string) => {
@@ -29,84 +45,109 @@ export default function FormationsScreen() {
   // 🔍 Appliquer les filtres
   const filteredFormations = useMemo(() => {
     return allFormations.filter((f) => {
-      const matchSearch = f.title.toLowerCase().includes(search.toLowerCase());
-      const matchType = type ? f.type.toLowerCase().includes(type.toLowerCase()) : true;
-      const matchMode = selectedModes.length ? selectedModes.includes(f.mode) : true;
+      const matchSearch = f.name?.toLowerCase().includes(search.toLowerCase());
+      const matchType = type ? f.type?.toLowerCase().includes(type.toLowerCase()) : true;
+
+      const dbModes = [];
+      if (f.is_presentiel) dbModes.push("Présentiel");
+      if (f.is_distanciel) dbModes.push("Distanciel");
+      if (f.is_asynchrone) dbModes.push("Asynchrone");
+
+      const matchMode = selectedModes.length
+        ? selectedModes.some((mode) => dbModes.includes(mode))
+        : true;
+
       const matchMin = minDuration ? f.duration >= parseInt(minDuration) : true;
       const matchMax = maxDuration ? f.duration <= parseInt(maxDuration) : true;
+
       return matchSearch && matchType && matchMode && matchMin && matchMax;
     });
-  }, [search, type, selectedModes, minDuration, maxDuration]);
+  }, [search, type, selectedModes, minDuration, maxDuration, allFormations]);
 
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>Formations</Text>
 
-      {/* 🔍 Barre de recherche */}
-      <TextInput
-        placeholder="Recherche (ex : langage, alimentation...)"
-        value={search}
-        onChangeText={setSearch}
-        style={styles.input}
-      />
-
-      {/* 🔎 Type de formation */}
-      <TextInput
-        placeholder="Type (ex : Initiale / Continue)"
-        value={type}
-        onChangeText={setType}
-        style={styles.input}
-      />
-
-      {/* ✅ Modalités */}
-      <Text style={styles.label}>Modalités :</Text>
-      <View style={styles.modes}>
-        {["Présentiel", "Distanciel", "Asynchrone"].map((mode) => (
-          <TouchableOpacity
-            key={mode}
-            style={[
-              styles.modeBtn,
-              selectedModes.includes(mode) && styles.modeSelected,
-            ]}
-            onPress={() => toggleMode(mode)}
-          >
-            <Text>{mode}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* ⏱ Durée */}
-      <Text style={styles.label}>Durée (heures) :</Text>
-      <View style={styles.row}>
-        <TextInput
-          placeholder="Min"
-          keyboardType="numeric"
-          value={minDuration}
-          onChangeText={setMinDuration}
-          style={styles.halfInput}
-        />
-        <TextInput
-          placeholder="Max"
-          keyboardType="numeric"
-          value={maxDuration}
-          onChangeText={setMaxDuration}
-          style={styles.halfInput}
-        />
-      </View>
-
-      {/* 📋 Résultats */}
-      <Text style={styles.label}>Résultats :</Text>
-      {filteredFormations.length === 0 ? (
-        <Text style={styles.noResult}>Aucune formation trouvée.</Text>
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0000ff" />
+          <Text>Chargement des formations...</Text>
+        </View>
       ) : (
-        filteredFormations.map((f) => (
-          <View key={f.id} style={styles.card}>
-            <Text style={styles.cardTitle}>{f.title}</Text>
-            <Text>⏱ {f.duration} heures</Text>
-            <Text>📘 {f.type}</Text>
-            <Text>💻 {f.mode}</Text>
+        <>
+          {/* 🔍 Barre de recherche */}
+          <TextInput
+            placeholder="Recherche (ex : langage, alimentation...)"
+            value={search}
+            onChangeText={setSearch}
+            style={styles.input}
+          />
+
+          {/* 🔎 Type de formation */}
+          <TextInput
+            placeholder="Type (ex : initial / continue)"
+            value={type}
+            onChangeText={setType}
+            style={styles.input}
+          />
+
+          {/* ✅ Modalités */}
+          <Text style={styles.label}>Modalités :</Text>
+          <View style={styles.modes}>
+            {["Présentiel", "Distanciel", "Asynchrone"].map((mode) => (
+              <TouchableOpacity
+                key={mode}
+                style={[
+                  styles.modeBtn,
+                  selectedModes.includes(mode) && styles.modeSelected,
+                ]}
+                onPress={() => toggleMode(mode)}
+              >
+                <Text>{mode}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
-        ))
+
+          {/* ⏱ Durée */}
+          <Text style={styles.label}>Durée (heures) :</Text>
+          <View style={styles.row}>
+            <TextInput
+              placeholder="Min"
+              keyboardType="numeric"
+              value={minDuration}
+              onChangeText={setMinDuration}
+              style={styles.halfInput}
+            />
+            <TextInput
+              placeholder="Max"
+              keyboardType="numeric"
+              value={maxDuration}
+              onChangeText={setMaxDuration}
+              style={styles.halfInput}
+            />
+          </View>
+
+          {/* 📋 Résultats */}
+          <Text style={styles.label}>Résultats :</Text>
+          {filteredFormations.length === 0 ? (
+            <Text style={styles.noResult}>Aucune formation trouvée.</Text>
+          ) : (
+            filteredFormations.map((f) => (
+              <View key={f.id} style={styles.card}>
+                <Text style={styles.cardTitle}>{f.name}</Text>
+                <Text>⏱ {f.duration} heures</Text>
+                <Text>📘 Type : {f.type}</Text>
+                <Text>
+                  💻 Modalités :{" "}
+                  {[f.is_presentiel && "Présentiel", f.is_distanciel && "Distanciel", f.is_asynchrone && "Asynchrone"]
+                    .filter(Boolean)
+                    .join(", ")}
+                </Text>
+                <Text>📍 Ville : {f.city || "non définie"}</Text>
+              </View>
+            ))
+          )}
+        </>
       )}
     </ScrollView>
   );
@@ -114,6 +155,7 @@ export default function FormationsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff", padding: 15 },
+  loadingContainer: { flex: 1, alignItems: "center", marginTop: 30 },
   title: { fontSize: 22, fontWeight: "bold", marginBottom: 15 },
   label: { fontWeight: "bold", marginTop: 10, marginBottom: 5 },
   input: {

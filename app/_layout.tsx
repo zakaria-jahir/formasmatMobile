@@ -24,8 +24,9 @@ function InnerLayout() {
     { id: "2", title: "Formations", route: "/formations" },
     { id: "3", title: "Formateurs", route: "/formateurs" },
     { id: "4", title: "Calendrier", route: "/calendrier" },
-    { id: "5", title: "À propos", route: "/apropos" },
+    { id: "7", title: "Salles de formations", route: "/TrainingRoomsScreen" },
     { id: "6", title: "Sessions", route: "/sessions" },
+    { id: "5", title: "À propos", route: "/apropos" },
   ];
 
   return (

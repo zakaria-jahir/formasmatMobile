@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import axios from "axios";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function FormationsScreen() {
   const [search, setSearch] = useState("");
@@ -16,33 +17,50 @@ export default function FormationsScreen() {
   const [selectedModes, setSelectedModes] = useState<string[]>([]);
   const [minDuration, setMinDuration] = useState("");
   const [maxDuration, setMaxDuration] = useState("");
-
   const [allFormations, setAllFormations] = useState([]);
+  const [userWishes, setUserWishes] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Chargement des données depuis l'API
   useEffect(() => {
     axios.get("http://192.168.0.75:8000/api/formations/")
-      .then((response) => {
-        setAllFormations(response.data);
+      .then((res) => {
+        setAllFormations(res.data);
+        return axios.get("http://192.168.0.75:8000/api/my-wishes/", { withCredentials: true });
+      })
+      .then((res) => {
+        setUserWishes(res.data.wished_ids);
         setLoading(false);
       })
-      .catch((error) => {
-        console.error("Erreur lors du chargement des formations :", error);
+      .catch((err) => {
+        console.error("❌ Erreur :", err);
         setLoading(false);
       });
   }, []);
 
-  // ➕ Sélectionner ou désélectionner un mode
+  const toggleWish = (formationId: number) => {
+    const isWished = userWishes.includes(formationId);
+    const url = isWished
+      ? "http://192.168.0.75:8000/api/remove-wish/"
+      : "http://192.168.0.75:8000/api/add-wish/";
+
+    axios.post(url, { formation_id: formationId }, { withCredentials: true })
+      .then(() => {
+        setUserWishes(prev => isWished
+          ? prev.filter(id => id !== formationId)
+          : [...prev, formationId]
+        );
+      })
+      .catch(err => {
+        console.error("❌ Erreur toggle souhait :", err);
+      });
+  };
+
   const toggleMode = (mode: string) => {
     setSelectedModes((prev) =>
-      prev.includes(mode)
-        ? prev.filter((m) => m !== mode)
-        : [...prev, mode]
+      prev.includes(mode) ? prev.filter((m) => m !== mode) : [...prev, mode]
     );
   };
 
-  // 🔍 Appliquer les filtres
   const filteredFormations = useMemo(() => {
     return allFormations.filter((f) => {
       const matchSearch = f.name?.toLowerCase().includes(search.toLowerCase());
@@ -66,7 +84,7 @@ export default function FormationsScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>Formations</Text>
+      <Text style={styles.title}>📚 Formations</Text>
 
       {loading ? (
         <View style={styles.loadingContainer}>
@@ -75,32 +93,25 @@ export default function FormationsScreen() {
         </View>
       ) : (
         <>
-          {/* 🔍 Barre de recherche */}
           <TextInput
-            placeholder="Recherche (ex : langage, alimentation...)"
+            placeholder="Recherche"
             value={search}
             onChangeText={setSearch}
             style={styles.input}
           />
-
-          {/* 🔎 Type de formation */}
           <TextInput
-            placeholder="Type (ex : initial / continue)"
+            placeholder="Type"
             value={type}
             onChangeText={setType}
             style={styles.input}
           />
 
-          {/* ✅ Modalités */}
           <Text style={styles.label}>Modalités :</Text>
           <View style={styles.modes}>
             {["Présentiel", "Distanciel", "Asynchrone"].map((mode) => (
               <TouchableOpacity
                 key={mode}
-                style={[
-                  styles.modeBtn,
-                  selectedModes.includes(mode) && styles.modeSelected,
-                ]}
+                style={[styles.modeBtn, selectedModes.includes(mode) && styles.modeSelected]}
                 onPress={() => toggleMode(mode)}
               >
                 <Text>{mode}</Text>
@@ -108,7 +119,6 @@ export default function FormationsScreen() {
             ))}
           </View>
 
-          {/* ⏱ Durée */}
           <Text style={styles.label}>Durée (heures) :</Text>
           <View style={styles.row}>
             <TextInput
@@ -127,26 +137,24 @@ export default function FormationsScreen() {
             />
           </View>
 
-          {/* 📋 Résultats */}
           <Text style={styles.label}>Résultats :</Text>
-          {filteredFormations.length === 0 ? (
-            <Text style={styles.noResult}>Aucune formation trouvée.</Text>
-          ) : (
-            filteredFormations.map((f) => (
-              <View key={f.id} style={styles.card}>
+          {filteredFormations.map((f) => (
+            <View key={f.id} style={styles.card}>
+              <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
                 <Text style={styles.cardTitle}>{f.name}</Text>
-                <Text>⏱ {f.duration} heures</Text>
-                <Text>📘 Type : {f.type}</Text>
-                <Text>
-                  💻 Modalités :{" "}
-                  {[f.is_presentiel && "Présentiel", f.is_distanciel && "Distanciel", f.is_asynchrone && "Asynchrone"]
-                    .filter(Boolean)
-                    .join(", ")}
-                </Text>
-                <Text>📍 Ville : {f.city || "non définie"}</Text>
+                <TouchableOpacity onPress={() => toggleWish(f.id)}>
+                  <Ionicons
+                    name={userWishes.includes(f.id) ? "heart" : "heart-outline"}
+                    size={20}
+                    color="red"
+                  />
+                </TouchableOpacity>
               </View>
-            ))
-          )}
+              <Text>⏱ {f.duration} heures</Text>
+              <Text>📘 Type : {f.type}</Text>
+              <Text>📍 Ville : {f.city || "non définie"}</Text>
+            </View>
+          ))}
         </>
       )}
     </ScrollView>
@@ -186,7 +194,6 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
-    gap: 10,
     marginBottom: 10,
   },
   halfInput: {
@@ -195,6 +202,7 @@ const styles = StyleSheet.create({
     borderColor: "#ddd",
     borderRadius: 5,
     padding: 10,
+    marginRight: 10,
   },
   card: {
     backgroundColor: "#fff8e1",

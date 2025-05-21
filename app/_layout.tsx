@@ -1,25 +1,20 @@
-import { Stack, useRouter } from "expo-router";
+import { Stack } from "expo-router";
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Modal,
-  FlatList,
-  Pressable,
-  Image,
-} from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Modal, FlatList, Pressable, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { useUser, UserProvider } from "../contexts/UserContext"; // Assurez-vous que ce chemin est correct
+import { useRouter } from "expo-router";
+import { useUser, UserProvider } from "../contexts/UserContext";
+import { useThemeMode, ThemeProvider } from "../contexts/ThemeContext";
 
 function InnerLayout() {
   const [menuVisible, setMenuVisible] = useState(false);
   const router = useRouter();
   const { user, logout } = useUser();
+  const { isDarkMode, toggleTheme } = useThemeMode();
 
   const menuItems = [
+    { id: "8", title: "Profil", route: "/profile" },
     { id: "1", title: "Accueil", route: "/" },
     { id: "2", title: "Formations", route: "/formations" },
     { id: "3", title: "Formateurs", route: "/formateurs" },
@@ -30,9 +25,8 @@ function InnerLayout() {
   ];
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
-      {/* NAVBAR EN HAUT */}
-      <View style={styles.navbar}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: isDarkMode ? "#121212" : "#fff" }}>
+      <View style={[styles.navbar, { backgroundColor: isDarkMode ? "#222" : "#f9b72a" }]}>
         <TouchableOpacity onPress={() => setMenuVisible(true)} style={styles.menuButton}>
           <Ionicons name="menu" size={24} color="#fff" />
         </TouchableOpacity>
@@ -40,6 +34,14 @@ function InnerLayout() {
         <Image source={require("../assets/images/logo.png")} style={styles.logo} />
 
         <View style={styles.rightIcons}>
+          <TouchableOpacity onPress={toggleTheme}>
+            <Ionicons
+              name={isDarkMode ? "sunny-outline" : "moon-outline"}
+              size={22}
+              color="#fff"
+            />
+          </TouchableOpacity>
+
           {user ? (
             <>
               <View style={styles.iconWrapper}>
@@ -54,11 +56,11 @@ function InnerLayout() {
             </>
           ) : (
             <>
-              <TouchableOpacity style={styles.iconWrapper} onPress={() => router.push("/login")}> 
+              <TouchableOpacity style={styles.iconWrapper} onPress={() => router.push("/login")}>
                 <Ionicons name="log-in-outline" size={20} color="#fff" />
                 <Text style={styles.iconText}>Connexion</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.iconWrapper} onPress={() => router.push("/register")}> 
+              <TouchableOpacity style={styles.iconWrapper} onPress={() => router.push("/register")}>
                 <Ionicons name="person-add-outline" size={20} color="#fff" />
                 <Text style={styles.iconText}>Inscription</Text>
               </TouchableOpacity>
@@ -100,7 +102,9 @@ function InnerLayout() {
 export default function Layout() {
   return (
     <UserProvider>
-      <InnerLayout />
+      <ThemeProvider>
+        <InnerLayout />
+      </ThemeProvider>
     </UserProvider>
   );
 }
@@ -108,7 +112,6 @@ export default function Layout() {
 const styles = StyleSheet.create({
   navbar: {
     height: 60,
-    backgroundColor: "#f9b72a",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",

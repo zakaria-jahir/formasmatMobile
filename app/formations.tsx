@@ -22,10 +22,13 @@ export default function FormationsScreen() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get("http://192.168.0.75:8000/api/formations/")
+    axios
+      .get("http://192.168.0.75:8000/api/formations/")
       .then((res) => {
         setAllFormations(res.data);
-        return axios.get("http://192.168.0.75:8000/api/my-wishes/", { withCredentials: true });
+        return axios.get("http://192.168.0.75:8000/api/my-wishes/", {
+          withCredentials: true,
+        });
       })
       .then((res) => {
         setUserWishes(res.data.wished_ids);
@@ -43,14 +46,16 @@ export default function FormationsScreen() {
       ? "http://192.168.0.75:8000/api/remove-wish/"
       : "http://192.168.0.75:8000/api/add-wish/";
 
-    axios.post(url, { formation_id: formationId }, { withCredentials: true })
+    axios
+      .post(url, { formation_id: formationId }, { withCredentials: true })
       .then(() => {
-        setUserWishes(prev => isWished
-          ? prev.filter(id => id !== formationId)
-          : [...prev, formationId]
+        setUserWishes((prev) =>
+          isWished
+            ? prev.filter((id) => id !== formationId)
+            : [...prev, formationId]
         );
       })
-      .catch(err => {
+      .catch((err) => {
         console.error("❌ Erreur toggle souhait :", err);
       });
   };
@@ -140,14 +145,15 @@ export default function FormationsScreen() {
           <Text style={styles.label}>Résultats :</Text>
           {filteredFormations.map((f) => (
             <View key={f.id} style={styles.card}>
-              <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
                 <Text style={styles.cardTitle}>{f.name}</Text>
-                <TouchableOpacity onPress={() => toggleWish(f.id)}>
+                <TouchableOpacity onPress={() => toggleWish(f.id)} style={styles.wishButton}>
                   <Ionicons
                     name={userWishes.includes(f.id) ? "heart" : "heart-outline"}
                     size={20}
                     color="red"
                   />
+                  <Text style={styles.wishText}>Souhait de formation</Text>
                 </TouchableOpacity>
               </View>
               <Text>⏱ {f.duration} heures</Text>
@@ -216,6 +222,15 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
     marginBottom: 4,
+  },
+  wishButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  wishText: {
+    fontSize: 13,
+    color: "red",
   },
   noResult: {
     textAlign: "center",

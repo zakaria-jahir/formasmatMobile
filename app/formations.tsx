@@ -1,15 +1,15 @@
-import React, { useState, useMemo, useEffect } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import axios from "axios";
+import React, { useEffect, useMemo, useState } from "react";
 import {
-  View,
-  Text,
-  TextInput,
+  ActivityIndicator,
   ScrollView,
   StyleSheet,
+  Text,
+  TextInput,
   TouchableOpacity,
-  ActivityIndicator,
+  View,
 } from "react-native";
-import axios from "axios";
-import { Ionicons } from "@expo/vector-icons";
 
 export default function FormationsScreen() {
   const [search, setSearch] = useState("");
@@ -100,12 +100,14 @@ export default function FormationsScreen() {
         <>
           <TextInput
             placeholder="Recherche"
+            placeholderTextColor="#000"
             value={search}
             onChangeText={setSearch}
             style={styles.input}
           />
           <TextInput
             placeholder="Type"
+            placeholderTextColor="#000"
             value={type}
             onChangeText={setType}
             style={styles.input}
@@ -128,6 +130,7 @@ export default function FormationsScreen() {
           <View style={styles.row}>
             <TextInput
               placeholder="Min"
+              placeholderTextColor="#000"
               keyboardType="numeric"
               value={minDuration}
               onChangeText={setMinDuration}
@@ -135,6 +138,7 @@ export default function FormationsScreen() {
             />
             <TextInput
               placeholder="Max"
+              placeholderTextColor="#000"
               keyboardType="numeric"
               value={maxDuration}
               onChangeText={setMaxDuration}

@@ -1,12 +1,10 @@
 import React, { useState } from "react";
 import {
-  View,
-  Text,
-  TextInput,
   ScrollView,
   StyleSheet,
-  TouchableOpacity,
-  Button,
+  Text,
+  TextInput,
+  TouchableOpacity
 } from "react-native";
 
 export default function NouveauFormateur() {
@@ -30,18 +28,21 @@ export default function NouveauFormateur() {
 
       <TextInput
         placeholder="Prénom"
+        placeholderTextColor="#000"
         value={prenom}
         onChangeText={setPrenom}
         style={styles.input}
       />
       <TextInput
         placeholder="Nom"
+        placeholderTextColor="#000"
         value={nom}
         onChangeText={setNom}
         style={styles.input}
       />
       <TextInput
         placeholder="Email"
+        placeholderTextColor="#000"
         keyboardType="email-address"
         value={email}
         onChangeText={setEmail}
@@ -49,6 +50,7 @@ export default function NouveauFormateur() {
       />
       <TextInput
         placeholder="Téléphone"
+        placeholderTextColor="#000"
         keyboardType="phone-pad"
         value={telephone}
         onChangeText={setTelephone}

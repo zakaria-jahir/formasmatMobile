@@ -17,7 +17,7 @@ export default function TrainingRoomsScreen() {
 
   useEffect(() => {
     axios
-      .get("http://192.168.0.75:8000/api/training-rooms/") // 🔁 adapte l'IP si besoin
+      .get("http://192.168.0.76:5000/api/training-rooms/") // 🔁 adapte l'IP si besoin
       .then((res) => {
         setRooms(res.data);
         setLoading(false);

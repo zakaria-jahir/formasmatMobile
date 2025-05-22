@@ -23,10 +23,10 @@ export default function FormationsScreen() {
 
   useEffect(() => {
     axios
-      .get("http://192.168.0.75:8000/api/formations/")
+      .get("http://192.168.0.76:5000/api/formations/")
       .then((res) => {
         setAllFormations(res.data);
-        return axios.get("http://192.168.0.75:8000/api/my-wishes/", {
+        return axios.get("http://192.168.0.76:5000/api/my-wishes/", {
           withCredentials: true,
         });
       })
@@ -43,8 +43,8 @@ export default function FormationsScreen() {
   const toggleWish = (formationId: number) => {
     const isWished = userWishes.includes(formationId);
     const url = isWished
-      ? "http://192.168.0.75:8000/api/remove-wish/"
-      : "http://192.168.0.75:8000/api/add-wish/";
+      ? "http://192.168.0.76:5000/api/remove-wish/"
+      : "http://192.168.0.76:5000/api/add-wish/";
 
     axios
       .post(url, { formation_id: formationId }, { withCredentials: true })

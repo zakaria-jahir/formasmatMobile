@@ -7,7 +7,7 @@ export default function SessionsScreen() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get('http://192.168.0.75:8000/api/sessions/')
+    axios.get('http://192.168.0.76:5000/api/sessions/')
       .then(response => {
         console.log('✅ Sessions reçues :', response.data);
         setSessions(response.data);

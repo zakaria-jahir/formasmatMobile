@@ -31,23 +31,22 @@ export default function ProfileScreen() {
   // Fetch user profile data and populate the form
   useEffect(() => {
     axios
-      .get("http://192.168.0.76:5000/api/users/profile/")
+      .get("http://192.168.0.76:5000/api/me/")
       .then((response) => {
-        const { first_name, last_name, email, rpe, other_rpe, sessions, wishes, completed } =
-          response.data;
-
+        console.log("API Response:", response.data); 
+        const { first_name, last_name, email, sessions, wishes, completed_trainings } = response.data;
+  
         setState((prevState) => ({
           ...prevState,
           formData: {
+            ...prevState.formData,
             firstName: first_name || "",
             lastName: last_name || "",
             email: email || "",
-            rpe: rpe || "",
-            otherRpe: other_rpe || "",
           },
           upcomingSessions: sessions || [],
           trainingWishes: wishes || [],
-          completedTrainings: completed || [],
+          completedTrainings: completed_trainings || [],
         }));
       })
       .catch((error) => {
@@ -153,7 +152,7 @@ export default function ProfileScreen() {
             <View style={styles.listItem}>
               <Text style={styles.listTitle}>{item.formation.name}</Text>
               <Text style={styles.listSubtitle}>
-                {item.dates.map((date) => date.date).join(", ")}
+                {(item.dates || []).map((date) => date.date).join(", ") || "Dates non disponibles"}
               </Text>
             </View>
           ),
@@ -166,18 +165,21 @@ export default function ProfileScreen() {
         <Text style={styles.cardTitle}>Souhaits de formation</Text>
         {renderList(
           trainingWishes,
-          ({ item }) => (
-            <View style={styles.listItem}>
-              <Text style={styles.listTitle}>{item.formation.name}</Text>
-              <Text style={styles.listSubtitle}>
-                {item.status === "assigned"
-                  ? "Assigné à une session"
-                  : "En attente"}
-              </Text>
-            </View>
-          ),
-          "Aucun souhait de formation"
-        )}
+            ({ item }) => (
+              <View style={styles.listItem}>
+                <Text style={styles.listTitle}>{item.formation.name}</Text>
+                <Text>⏱ Durée : {item.formation.duration} heures</Text>
+                <Text>📘 Type : {item.formation.type}</Text>
+                <Text>📍 Ville : {item.formation.city || "Non définie"}</Text>
+                <Text style={styles.listSubtitle}>
+                  {item.status === "assigned"
+                    ? "Assigné à une session"
+                    : "En attente"}
+        </Text>
+      </View>
+  ),
+  "Aucun souhait de formation"
+)}
       </View>
 
       {/* Completed Trainings */}

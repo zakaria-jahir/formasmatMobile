@@ -10,7 +10,7 @@ export default function CalendarScreen() {
 
   // 🔁 Charger les sessions depuis l'API
   useEffect(() => {
-    axios.get("http://192.168.0.75:8000/api/sessions/")
+    axios.get("http://192.168.0.76:5000/api/sessions/")
       .then((response) => {
         setSessions(response.data);
         setLoading(false);

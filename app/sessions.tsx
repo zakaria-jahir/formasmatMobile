@@ -12,6 +12,7 @@ export default function SessionsScreen() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+
     Promise.all([
       axios.get('http://192.168.0.75:8000/api/sessions/'),
       axios.get('http://192.168.0.75:8000/api/formations/')
@@ -19,6 +20,7 @@ export default function SessionsScreen() {
       .then(([sessionsRes, formationsRes]) => {
         setSessions(sessionsRes.data);
         setFormations(formationsRes.data);
+
         setLoading(false);
       })
       .catch(err => {

@@ -9,7 +9,12 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Dimensions,
 } from "react-native";
+import Animated, { FadeInUp } from "react-native-reanimated";
+import { useNavigation } from "@react-navigation/native";
+
+const { width } = Dimensions.get("window");
 
 export default function FormationsScreen() {
   const [search, setSearch] = useState("");
@@ -20,6 +25,8 @@ export default function FormationsScreen() {
   const [allFormations, setAllFormations] = useState([]);
   const [userWishes, setUserWishes] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const navigation = useNavigation();
 
   useEffect(() => {
     axios
@@ -35,7 +42,7 @@ export default function FormationsScreen() {
         setLoading(false);
       })
       .catch((err) => {
-        console.error("❌ Erreur :", err);
+        console.error("❌ Erreur de chargement :", err);
         setLoading(false);
       });
   }, []);
@@ -91,89 +98,89 @@ export default function FormationsScreen() {
     <ScrollView style={styles.container}>
       <Text style={styles.title}>📚 Formations</Text>
 
-      {loading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#0000ff" />
-          <Text>Chargement des formations...</Text>
-        </View>
-      ) : (
-        <>
-          <TextInput
-            placeholder="Recherche"
-            placeholderTextColor="#000"
-            value={search}
-            onChangeText={setSearch}
-            style={styles.input}
-          />
-          <TextInput
-            placeholder="Type"
-            placeholderTextColor="#000"
-            value={type}
-            onChangeText={setType}
-            style={styles.input}
-          />
+      <TextInput
+        placeholder="Recherche"
+        placeholderTextColor="#000"
+        value={search}
+        onChangeText={setSearch}
+        style={styles.input}
+      />
+      <TextInput
+        placeholder="Type"
+        placeholderTextColor="#000"
+        value={type}
+        onChangeText={setType}
+        style={styles.input}
+      />
 
-          <Text style={styles.label}>Modalités :</Text>
-          <View style={styles.modes}>
-            {["Présentiel", "Distanciel", "Asynchrone"].map((mode) => (
-              <TouchableOpacity
-                key={mode}
-                style={[styles.modeBtn, selectedModes.includes(mode) && styles.modeSelected]}
-                onPress={() => toggleMode(mode)}
-              >
-                <Text>{mode}</Text>
-              </TouchableOpacity>
-            ))}
+      <Text style={styles.label}>Modalités :</Text>
+      <View style={styles.modes}>
+        {["Présentiel", "Distanciel", "Asynchrone"].map((mode) => (
+          <TouchableOpacity
+            key={mode}
+            style={[styles.modeBtn, selectedModes.includes(mode) && styles.modeSelected]}
+            onPress={() => toggleMode(mode)}
+          >
+            <Text>{mode}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      <Text style={styles.label}>Durée (heures) :</Text>
+      <View style={styles.row}>
+        <TextInput
+          placeholder="Min"
+          placeholderTextColor="#000"
+          keyboardType="numeric"
+          value={minDuration}
+          onChangeText={setMinDuration}
+          style={styles.halfInput}
+        />
+        <TextInput
+          placeholder="Max"
+          placeholderTextColor="#000"
+          keyboardType="numeric"
+          value={maxDuration}
+          onChangeText={setMaxDuration}
+          style={styles.halfInput}
+        />
+      </View>
+
+      <Text style={styles.label}>Résultats :</Text>
+      {filteredFormations.map((f, index) => (
+        <Animated.View
+          entering={FadeInUp.delay(index * 100).duration(500)}
+          key={f.id}
+          style={styles.card}
+        >
+          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+            <Text style={styles.cardTitle}>{f.name}</Text>
+            <TouchableOpacity onPress={() => toggleWish(f.id)} style={styles.wishButton}>
+              <Ionicons
+                name={userWishes.includes(f.id) ? "heart" : "heart-outline"}
+                size={20}
+                color="red"
+              />
+              <Text style={styles.wishText}>Souhait de formation</Text>
+            </TouchableOpacity>
           </View>
-
-          <Text style={styles.label}>Durée (heures) :</Text>
-          <View style={styles.row}>
-            <TextInput
-              placeholder="Min"
-              placeholderTextColor="#000"
-              keyboardType="numeric"
-              value={minDuration}
-              onChangeText={setMinDuration}
-              style={styles.halfInput}
-            />
-            <TextInput
-              placeholder="Max"
-              placeholderTextColor="#000"
-              keyboardType="numeric"
-              value={maxDuration}
-              onChangeText={setMaxDuration}
-              style={styles.halfInput}
-            />
-          </View>
-
-          <Text style={styles.label}>Résultats :</Text>
-          {filteredFormations.map((f) => (
-            <View key={f.id} style={styles.card}>
-              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                <Text style={styles.cardTitle}>{f.name}</Text>
-                <TouchableOpacity onPress={() => toggleWish(f.id)} style={styles.wishButton}>
-                  <Ionicons
-                    name={userWishes.includes(f.id) ? "heart" : "heart-outline"}
-                    size={20}
-                    color="red"
-                  />
-                  <Text style={styles.wishText}>Souhait de formation</Text>
-                </TouchableOpacity>
-              </View>
-              <Text>⏱ {f.duration} heures</Text>
-              <Text>📘 Type : {f.type}</Text>
-              <Text>📍 Ville : {f.city || "non définie"}</Text>
-            </View>
-          ))}
-        </>
-      )}
+          <Text>⏱ {f.duration} heures</Text>
+          <Text>📘 Type : {f.type}</Text>
+          <Text>📍 Ville : {f.city || "non définie"}</Text>
+          <TouchableOpacity
+            style={styles.detailButton}
+            onPress={() => navigation.navigate("FormationDetail", { formation: f })}
+          >
+            <Text style={styles.detailButtonText}>➡️ Voir les détails</Text>
+          </TouchableOpacity>
+        </Animated.View>
+      ))}
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff", padding: 15 },
-  loadingContainer: { flex: 1, alignItems: "center", marginTop: 30 },
   title: { fontSize: 22, fontWeight: "bold", marginBottom: 15 },
   label: { fontWeight: "bold", marginTop: 10, marginBottom: 5 },
   input: {
@@ -204,7 +211,6 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 10,
   },
   halfInput: {
     flex: 1,
@@ -213,33 +219,49 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: 10,
     marginRight: 10,
+    fontWeight: 'bold',
   },
   card: {
-    backgroundColor: "#fff8e1",
+    backgroundColor: "#fefefe",
     borderWidth: 1,
-    borderColor: "#f0a500",
+    borderColor: "#eee",
+    marginBottom: 15,
     padding: 15,
-    borderRadius: 8,
-    marginBottom: 10,
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 6,
+    elevation: 5,
   },
   cardTitle: {
     fontWeight: "bold",
-    fontSize: 16,
+    fontSize: 18,
     marginBottom: 4,
+    color: "#333",
   },
   wishButton: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
   },
   wishText: {
     fontSize: 13,
     color: "red",
   },
-  noResult: {
-    textAlign: "center",
-    color: "gray",
-    marginTop: 20,
-    fontStyle: "italic",
+  detailButton: {
+    marginTop: 10,
+    backgroundColor: '#4facfe',
+    padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  detailButtonText: {
+    color: '#fff',
+    fontWeight: '600',
   },
 });

@@ -31,7 +31,7 @@ export default function ProfileScreen() {
   // Fetch user profile data and populate the form
   useEffect(() => {
     axios
-      .get("http://192.168.0.76:5000/api/users/profile/")
+      .get("http://192.168.0.75:8000/api/users/profile/")
       .then((response) => {
         const { first_name, last_name, email, rpe, other_rpe, sessions, wishes, completed } =
           response.data;

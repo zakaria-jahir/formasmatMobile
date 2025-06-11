@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  ActivityIndicator,
-  TouchableOpacity,
-} from "react-native";
 import axios from "axios";
 import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function TrainingRoomsScreen() {
   const [rooms, setRooms] = useState([]);
@@ -17,7 +17,7 @@ export default function TrainingRoomsScreen() {
 
   useEffect(() => {
     axios
-      .get("http://192.168.0.76:5000/api/training-rooms/") // 🔁 adapte l'IP si besoin
+      .get("http://172.20.10.11:5000/api/training-rooms/") // 🔁 adapte l'IP si besoin
       .then((res) => {
         setRooms(res.data);
         setLoading(false);

@@ -20,7 +20,7 @@ export default function SalleDetail() {
 
   useEffect(() => {
     axios
-      .get(`http://192.168.0.75:8000/api/training-rooms/${id}/`)
+      .get(`http://192.168.0.76:5000/api/training-rooms/${id}/`)
       .then((res) => {
         setRoom(res.data);
         setLoading(false);

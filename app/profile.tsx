@@ -12,6 +12,7 @@ import {
 } from "react-native";
 
 export default function ProfileScreen() {
+  const [csrfToken, setCsrfToken] = useState("");
   const [state, setState] = useState({
     formData: {
       firstName: "",
@@ -31,12 +32,10 @@ export default function ProfileScreen() {
   // Fetch user profile data and populate the form
   useEffect(() => {
     axios
-
-      .get("http://192.168.0.75:8000/api/users/profile/")
-
+      .get("http://172.20.10.11:5000/api/me/")
       .then((response) => {
         console.log("API Response:", response.data); 
-        const { first_name, last_name, email, sessions, wishes, completed_trainings } = response.data;
+        const { csrf_token, first_name, last_name, email, sessions, wishes, completed_trainings } = response.data;
   
         setState((prevState) => ({
           ...prevState,
@@ -50,6 +49,7 @@ export default function ProfileScreen() {
           trainingWishes: wishes || [],
           completedTrainings: completed_trainings || [],
         }));
+        setCsrfToken(csrf_token);
       })
       .catch((error) => {
         console.error("Error fetching profile data:", error);
@@ -65,19 +65,32 @@ export default function ProfileScreen() {
     }));
   };
 
+ 
+  const token = "8da428c67538f04358736ec5fd5ffa8188674c56"
+
   // Handle form submission
   const handleSubmit = () => {
     axios
-      .post("http://192.168.0.76:5000/api/update-profile/", formData)
+      .post(
+        "http://172.20.10.11:5000/api/users/update-profile/",
+        {
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          email: formData.email,
+        },// Ensure this matches the backend's expected format
+        {
+          headers: {
+            "X-CSRFToken": csrfToken,
+            // Add Authorization header if needed
+            "Authorization": `Bearer ${token}`,
+          },
+        }
+      )
       .then(() => {
         Alert.alert("Success", "Profile updated successfully!");
       })
       .catch((error) => {
-        console.error("Error updating profile:", error);
-        setState((prevState) => ({
-          ...prevState,
-          errors: error.response?.data?.errors || { general: "An error occurred." },
-        }));
+        console.error("Error updating profile:", error.response?.data || error.message);
       });
   };
 

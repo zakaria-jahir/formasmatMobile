@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, Dimensions } from 'react-native';
 import axios from 'axios';
 import { LinearGradient } from 'expo-linear-gradient';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Dimensions, FlatList, StyleSheet, Text, View } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 
 const { width } = Dimensions.get('window');
@@ -14,8 +14,8 @@ export default function SessionsScreen() {
   useEffect(() => {
 
     Promise.all([
-      axios.get('http://192.168.0.75:8000/api/sessions/'),
-      axios.get('http://192.168.0.75:8000/api/formations/')
+      axios.get('http://172.20.10.11:5000/api/sessions/'),
+      axios.get('http://172.20.10.11:5000/api/formations/')
     ])
       .then(([sessionsRes, formationsRes]) => {
         setSessions(sessionsRes.data);

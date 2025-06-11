@@ -1,16 +1,16 @@
+import { Ionicons } from "@expo/vector-icons";
+import axios from "axios";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
   ActivityIndicator,
   Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import axios from "axios";
 
 export default function FormateursScreen() {
   const router = useRouter();
@@ -18,7 +18,7 @@ export default function FormateursScreen() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get("http://192.168.0.75:8000/api/trainers/")
+    axios.get("http://172.20.10.11:5000/api/trainers/")
       .then((response) => {
         setFormateurs(response.data);
         setLoading(false);
